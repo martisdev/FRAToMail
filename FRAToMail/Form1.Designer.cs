@@ -72,6 +72,7 @@
             this.metroLinkWeb = new MetroFramework.Controls.MetroLink();
             this.metroLinkMail = new MetroFramework.Controls.MetroLink();
             this.metroLinkVersion = new MetroFramework.Controls.MetroLink();
+            this.metroTileHelp = new MetroFramework.Controls.MetroTile();
             ((System.ComponentModel.ISupportInitialize)(this.metroGridListFra)).BeginInit();
             this.metroPanel1.SuspendLayout();
             this.metroPanel2.SuspendLayout();
@@ -555,10 +556,10 @@
             this.metroProgressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.metroProgressBar1.HideProgressText = false;
-            this.metroProgressBar1.Location = new System.Drawing.Point(128, 83);
+            this.metroProgressBar1.Location = new System.Drawing.Point(53, 83);
             this.metroProgressBar1.Maximum = 3;
             this.metroProgressBar1.Name = "metroProgressBar1";
-            this.metroProgressBar1.Size = new System.Drawing.Size(634, 22);
+            this.metroProgressBar1.Size = new System.Drawing.Size(661, 22);
             this.metroProgressBar1.TabIndex = 41;
             this.metroProgressBar1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
@@ -766,7 +767,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.metroLabelInfoProcess.FontSize = MetroFramework.MetroLabelSize.Tall;
             this.metroLabelInfoProcess.FontWeight = MetroFramework.MetroLabelWeight.Bold;
-            this.metroLabelInfoProcess.Location = new System.Drawing.Point(220, 108);
+            this.metroLabelInfoProcess.Location = new System.Drawing.Point(158, 108);
             this.metroLabelInfoProcess.Name = "metroLabelInfoProcess";
             this.metroLabelInfoProcess.Size = new System.Drawing.Size(451, 25);
             this.metroLabelInfoProcess.TabIndex = 46;
@@ -810,12 +811,29 @@
             this.metroLinkVersion.TextAlign = System.Drawing.ContentAlignment.TopLeft;
             this.metroLinkVersion.UseSelectable = true;
             // 
+            // metroTileHelp
+            // 
+            this.metroTileHelp.ActiveControl = null;
+            this.metroTileHelp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.metroTileHelp.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.metroTileHelp.Location = new System.Drawing.Point(733, 52);
+            this.metroTileHelp.Name = "metroTileHelp";
+            this.metroTileHelp.Size = new System.Drawing.Size(58, 54);
+            this.metroTileHelp.TabIndex = 50;
+            this.metroTileHelp.TileImage = ((System.Drawing.Image)(resources.GetObject("metroTileHelp.TileImage")));
+            this.metroTileHelp.TileImageAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.toolTip1.SetToolTip(this.metroTileHelp, "Finalitza la aplicació");
+            this.metroTileHelp.UseSelectable = true;
+            this.metroTileHelp.UseTileImage = true;
+            this.metroTileHelp.Click += new System.EventHandler(this.metroTileHelp_Click);
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.metroTileClose;
             this.ClientSize = new System.Drawing.Size(890, 606);
+            this.Controls.Add(this.metroTileHelp);
             this.Controls.Add(this.metroLinkVersion);
             this.Controls.Add(this.metroLinkMail);
             this.Controls.Add(this.metroLinkWeb);
@@ -882,6 +900,7 @@
         private MetroFramework.Controls.MetroLink metroLinkWeb;
         private MetroFramework.Controls.MetroLink metroLinkMail;
         private MetroFramework.Controls.MetroLink metroLinkVersion;
+        private MetroFramework.Controls.MetroTile metroTileHelp;
     }
 }
 

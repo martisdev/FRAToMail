@@ -36,3 +36,4 @@ Source: PdfSharp.dll; DestDir: {app};  Flags:  sharedfile
 
 [Icons]
 Name: "{group}\Factures H2O per E-mail"; Filename: "{app}\FRAToMail.exe"; WorkingDir: "{app}" ;
+Name: "{userdesktop}\Factures H2O per E-mail"; Filename: "{app}\FRAToMail.exe"; WorkingDir: "{app}";

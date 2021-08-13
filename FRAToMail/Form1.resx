@@ -282,6 +282,18 @@
         8JvtJ0+B5qIl2PaPAAAAAElFTkSuQmCC
 </value>
   </data>
+  <data name="metroTileHelp.TileImage" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABIAAAAwCAYAAAAcqipqAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAJcEhZcwAADdcAAA3XAUIom3gAAAAHdElNRQfjCAMPJQ561p1+AAABLElEQVRIS+3Vvy5EQRzF
+        8SuxnUpLiJJa4wk20XgE0fMEotZqiOdQeoZt6HUaxWbbRYLvSW4xd+fMn4xK3JN8kmvm/H6N3btdIps4
+        xwzLnp4voLuqnOAV3wm6UyebQ3zALQh9Qt1k3uAGHXVtzuAGcjQT5RGunKOZKC9w5RzNRHmGK+c8Icod
+        XDnnFlEO4Mo5+7C5gRtw1E1mAw9wgyF11M1mDfdYIPyU61lnulOnOns4xWVPzzob84scQ++X8N9bco0J
+        BpnDlUu2MYgr1djFIK5U4w8s0m+WK5ZEi64QFr5W/k6JFq1jCzs4ghtyokVhdOmGnHFR2bio7D8tav3S
+        qqsZzWpH02tktaMd3Xtw0EovR3vRwh62sIct7GGL5p/skHZ00/7BFWow201/AI/pGoxtLVeWAAAAAElF
+        TkSuQmCC
+</value>
+  </data>
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         AAABAAEAMDAAAAEAIACoJQAAFgAAACgAAAAwAAAAYAAAAAEAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
