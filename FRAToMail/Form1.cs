@@ -578,5 +578,10 @@ namespace FRAToMail
                 UseShellExecute = true
             });
         }
+
+        private void metroTileHelp_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
