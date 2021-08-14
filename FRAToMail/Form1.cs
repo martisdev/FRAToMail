@@ -17,7 +17,6 @@ using System.Diagnostics;
 using System.Data.OleDb;
 using System.Net.Mail;
 
-
 namespace FRAToMail
 {
     public partial class FormMain : MetroForm
@@ -581,7 +580,13 @@ namespace FRAToMail
 
         private void metroTileHelp_Click(object sender, EventArgs e)
         {
-
+            
+            var path = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().CodeBase) + @"\help\index.html";
+            System.Diagnostics.Process.Start(new ProcessStartInfo
+            {
+                FileName = path,
+                UseShellExecute = true
+            });
         }
     }
 }
