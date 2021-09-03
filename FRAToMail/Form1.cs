@@ -17,7 +17,6 @@ using System.Diagnostics;
 using System.Data.OleDb;
 using System.Net.Mail;
 
-
 namespace FRAToMail
 {
     public partial class FormMain : MetroForm
@@ -239,7 +238,7 @@ namespace FRAToMail
             if (chk_all_steps.Checked == false) { Step_3(); }
         }
 
-        private void Step_3()
+        private bool Step_3()
         {
             metroLabelInfoProcess.Visible = true;
             metroLabelInfoProcess.Text = "Enviant correus ...";
@@ -256,6 +255,7 @@ namespace FRAToMail
             metroProgressBar1.Value = 3;
             metroTileClose.Enabled = true;
             metroLabelInfoProcess.Visible = false;
+            return true;
         }
 
         private void SendEmails()
@@ -362,7 +362,7 @@ namespace FRAToMail
 
         private void metroTile3_Click(object sender, EventArgs e)
         {
-            Step_3();
+            Step_3();                
         }
 
         private void metroTileClose_Click(object sender, EventArgs e)
@@ -581,7 +581,15 @@ namespace FRAToMail
 
         private void metroTileHelp_Click(object sender, EventArgs e)
         {
-
+            
+            var path = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().CodeBase) + @"\help\index.html";
+            System.Diagnostics.Process.Start(new ProcessStartInfo
+            {
+                FileName = path,
+                UseShellExecute = true
+            });
+            //the end.
         }
     }
 }
+//https://azuredevopslabs.com/labs/devopsserver/github/
