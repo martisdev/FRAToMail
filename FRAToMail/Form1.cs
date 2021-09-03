@@ -238,7 +238,7 @@ namespace FRAToMail
             if (chk_all_steps.Checked == false) { Step_3(); }
         }
 
-        private void Step_3()
+        private bool Step_3()
         {
             metroLabelInfoProcess.Visible = true;
             metroLabelInfoProcess.Text = "Enviant correus ...";
@@ -255,6 +255,7 @@ namespace FRAToMail
             metroProgressBar1.Value = 3;
             metroTileClose.Enabled = true;
             metroLabelInfoProcess.Visible = false;
+            return true;
         }
 
         private void SendEmails()
@@ -361,7 +362,7 @@ namespace FRAToMail
 
         private void metroTile3_Click(object sender, EventArgs e)
         {
-            Step_3();
+            Step_3();                
         }
 
         private void metroTileClose_Click(object sender, EventArgs e)
@@ -587,6 +588,7 @@ namespace FRAToMail
                 FileName = path,
                 UseShellExecute = true
             });
+            //the end.
         }
     }
 }
