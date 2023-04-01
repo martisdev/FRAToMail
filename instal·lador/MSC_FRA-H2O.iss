@@ -11,7 +11,7 @@ AppPublisherURL=https://www.msc-soft.com
 AppUpdatesURL=https://msc-soft.com/download/
 AllowNoIcons=yes
 
-SourceDir="C:\MSC Source\Windows_APP\FRAToMail\FRAToMail\bin\Debug"
+SourceDir="C:\MSC Source\Windows_APP\FRAToMail\FRAToMail\bin\Release"
 
 WizardImageFile="logo_vert_164.bmp"
 WizardSmallImageFile="logo_55.bmp"

@@ -157,6 +157,7 @@
             this.metroGridListFra.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.metroGridListFra.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.metroGridListFra.Location = new System.Drawing.Point(73, 53);
+            this.metroGridListFra.MultiSelect = false;
             this.metroGridListFra.Name = "metroGridListFra";
             this.metroGridListFra.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.None;
             dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
@@ -841,9 +842,9 @@
             this.Controls.Add(this.metroProgressBarSpinner);
             this.Controls.Add(this.metroProgressBar1);
             this.Controls.Add(this.metroTileClose);
-            this.Controls.Add(this.metroPanel1);
             this.Controls.Add(this.metroPanel3);
             this.Controls.Add(this.metroPanel2);
+            this.Controls.Add(this.metroPanel1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "FormMain";
             this.Text = "Enviador de factures per e-mail";
