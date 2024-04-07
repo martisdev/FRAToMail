@@ -32,7 +32,19 @@ Source: MetroFramework.Design.dll; DestDir: {app};  Flags:  sharedfile
 Source: MetroFramework.dll; DestDir: {app};  Flags:  sharedfile
 Source: MetroFramework.Fonts.dll; DestDir: {app};  Flags:  sharedfile 
 Source: PdfSharp.Charting.dll; DestDir: {app};  Flags:  sharedfile
-Source: PdfSharp.dll; DestDir: {app};  Flags:  sharedfile
+Source: PdfSharp.dll; DestDir: {app};  Flags:  sharedfile 
+Source: BouncyCastle.Cryptography.dll; DestDir: {app};  Flags:  sharedfile
+Source: Google.Apis.Auth.dll ; DestDir: {app};  Flags:  sharedfile
+Source: Google.Apis.Core.dll ; DestDir: {app};  Flags:  sharedfile
+Source: Google.Apis.dll ; DestDir: {app};  Flags:  sharedfile
+Source: Google.Apis.Gmail.v1.dll ; DestDir: {app};  Flags:  sharedfile
+Source: MetroFramework.Design.dll ; DestDir: {app};  Flags:  sharedfile
+Source: MimeKit.dll; DestDir: {app};  Flags:  sharedfile
+Source: Newtonsoft.Json.dll ; DestDir: {app};  Flags:  sharedfile
+Source: System.Buffers.dll ; DestDir: {app};  Flags:  sharedfile
+Source: System.Memory.dll ; DestDir: {app};  Flags:  sharedfile
+Source: System.Numerics.Vectors.dll ; DestDir: {app};  Flags:  sharedfile
+Source: System.Runtime.CompilerServices.Unsafe.dll; DestDir: {app};  Flags:  sharedfile
 
 [Icons]
 Name: "{group}\Factures H2O per E-mail"; Filename: "{app}\FRAToMail.exe"; WorkingDir: "{app}" ;

@@ -11,9 +11,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Mail;
+using MimeKit;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using Google.Apis.Gmail.v1;
+using System.Text.RegularExpressions;
+
 
 namespace FRAToMail
 {
@@ -21,9 +24,16 @@ namespace FRAToMail
     {
 
         #region CONSTS
+        
+        const string APPLICATION_NAME = "FraToMail";
+        #endregion
 
-        const string nom_remitent = "Hoserpi SL";
-
+        #region PROPERTIES
+        string NameMailFrom
+        {
+            get;
+            set;
+        }
         #endregion
 
         #region FIELDS
@@ -40,7 +50,7 @@ namespace FRAToMail
         public FormMain()
         {
             InitializeComponent();
-            metroLinkVersion.Text = string.Format("Versió: {0}", Application.ProductVersion );
+            metroLinkVersion.Text = string.Format("Versió: {0}", Application.ProductVersion);
         }
 
         #endregion
@@ -49,7 +59,7 @@ namespace FRAToMail
 
         private void txtFiletoImport_ButtonClick(object sender, EventArgs e)
         {
-
+            
             //using (var fbd = new FolderBrowserDialog())
             //{
             //    fbd.SelectedPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
@@ -65,11 +75,9 @@ namespace FRAToMail
             var path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             OpenFileDialog openFileDialog1 = new OpenFileDialog
             {
-
-
                 InitialDirectory = path,
                 Title = "Busca el fitxer PDF que conté totes les factures",
-
+                
                 CheckFileExists = true,
                 CheckPathExists = true,
 
@@ -83,20 +91,17 @@ namespace FRAToMail
 
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                txtDirToImport.Text= openFileDialog1.FileName;
-
-                dir_output = System.IO.Path.GetDirectoryName(txtDirToImport.Text)+"\\"+ DateTime.Now.ToString("yyyy-MM-dd");
-
-
+                txtDirToImport.Text = openFileDialog1.FileName;
+                dir_output = System.IO.Path.GetDirectoryName(txtDirToImport.Text) + "\\" + DateTime.Now.ToString("yyyy-MM-dd");                
             }
         }
 
         private void metroGridListFra_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if( metroGridListFra.Columns[e.ColumnIndex].Name == "col_open_pdf")
+            if (metroGridListFra.Columns[e.ColumnIndex].Name == "col_open_pdf")
             {
                 string PathFitxer = metroGridListFra.Rows[e.RowIndex].Cells["col_pdf"].Value.ToString();
-                if( File.Exists(PathFitxer))
+                if (File.Exists(PathFitxer))
                 {
                     try
                     {
@@ -117,7 +122,7 @@ namespace FRAToMail
             try
             {
                 Process.Start("explorer.exe", dir_output);
-            }            
+            }
             catch { }
         }
 
@@ -128,7 +133,7 @@ namespace FRAToMail
 
         private void metroTile3_Click(object sender, EventArgs e)
         {
-            Step_3();                
+            Step_3();
         }
 
         private void metroTileClose_Click(object sender, EventArgs e)
@@ -137,7 +142,7 @@ namespace FRAToMail
         }
 
         private void txtDirToImport_TextChanged(object sender, EventArgs e)
-        {            
+        {
             //metroTile1.Enabled = (txtDirToImport.Text.Length > 0 && txtFileDataBase.Text.Length > 0);
         }
 
@@ -177,29 +182,44 @@ namespace FRAToMail
         private void metroTile5_Click(object sender, EventArgs e)
         {
             metroTileClose.Enabled = false;
-            int port_server = int.Parse( metroTextBoxMailPort.Text);
-            string from_mail = metroTextBoxMailRemitent.Text;
+            
             string to_mail = metroTextBoxMailInform.Text;
-            string pws = metroTextBoxMailPsw.Text;
-            string smtp = metroTextBoxMailSMTP.Text;
+            string from_mail = "aigua@hostalets.cat";
 
-            using (MailMessage emailMessage = new MailMessage())
+            // Your client ID and secret obtained from the Google Developer Console
+            string clientId = "1094024309478-2rstujeg08s3qge5dsphpj2rbqnt9dac.apps.googleusercontent.com";
+            string clientSecret = "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";
+
+            // Scopes for the Gmail API
+            string[] scopes = { GmailService.Scope.GmailSend };
+
+            // Path to the credentials file
+            string strWorkPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            string CredentialFile = Path.Combine(strWorkPath, "credential.json");
+            //string credPath = "C:\\temp\\GmailOAuthExample\\GmailOAuthExample\\credentials\\credentials2.json";
+            OAuthGmail oAuthGmail = new OAuthGmail(clientId, clientSecret, scopes, CredentialFile, APPLICATION_NAME);
+            var message = new MimeMessage();
+            
+            //message.From.Add(new MailboxAddress("Servei aigua", "aigua@elshostaletsdepierola.cat"));
+            message.From.Add(new MailboxAddress(this.NameMailFrom, from_mail));
+            message.To.Add(new MailboxAddress("Hooserpi", to_mail));
+            message.Subject = "Informe d'enviament factures de l'aigua";
+
+            var bodyBuilder = new BodyBuilder();                        
+            bodyBuilder.TextBody = txtInforme.Text;
+            message.Body = bodyBuilder.ToMessageBody();
+
+            // Send email
+            try
             {
-                emailMessage.From = new MailAddress(from_mail, nom_remitent);
-                emailMessage.To.Add(new MailAddress(to_mail));
-                emailMessage.Subject = "Informe d'enviament factures de l'aigua";
-                emailMessage.Body = txtInforme.Text;
-                emailMessage.Priority = MailPriority.Normal;
-                using (SmtpClient MailClient = new SmtpClient(smtp, port_server))
-                {
-                    //MailClient.EnableSsl = true;
-                    MailClient.Credentials = new System.Net.NetworkCredential(from_mail, pws);
-                    MailClient.Send(emailMessage);
-                }
+                SendEmail(oAuthGmail.Service, "me", message);
+                
             }
+            catch{}
+
             metroTileClose.Enabled = true;
-            MetroFramework.MetroMessageBox.Show(this, "Informe enviat a " + from_mail , "informació", MessageBoxButtons.OK, MessageBoxIcon.Information, 100);
-        } 
+            MetroFramework.MetroMessageBox.Show(this, "Informe enviat a " + to_mail, "informació", MessageBoxButtons.OK, MessageBoxIcon.Information, 100);
+        }
 
         private void metroLinkWeb_Click(object sender, EventArgs e)
         {
@@ -221,7 +241,7 @@ namespace FRAToMail
 
         private void metroTileHelp_Click(object sender, EventArgs e)
         {
-            
+
             var path = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().CodeBase) + @"\help\index.html";
             System.Diagnostics.Process.Start(new ProcessStartInfo
             {
@@ -263,29 +283,7 @@ namespace FRAToMail
                 new_row.Cells["col_comptador"].Value = num_comptador.ToString("D9");
                 new_row.Cells["col_import"].Value = extractedText[3];
 
-                string usuari = Get_nom_usuari(num_comptador.ToString("D9"));
-
-                //if (extractedText[41] == "Aquest document només acredita el pagament si va amb autentificació mecànica i/o emplenat amb la data i el segell")
-                //{
-                //    usuari = extractedText[40];
-                //}
-                //else
-                //{
-                //    usuari = extractedText[41];
-                //}
-
-                //string new_name_user = "";
-                //if (usuari.Contains(",") == true)
-                //{
-                //    string[] array_user = usuari.Split(new char[] { ',' });
-                //    new_name_user = ToTitleCase(array_user[1].Trim()) + " " + ToTitleCase(array_user[0].Trim());
-                //}
-                //else
-                //{
-                //    new_name_user = ToTitleCase(usuari);
-                //}
-
-                //new_row.Cells["col_client"].Value = new_name_user;
+                //string usuari = Get_nom_usuari(num_comptador.ToString("D9"));
                 new_row.Cells["col_client"].Value = Get_nom_usuari(num_comptador.ToString("D9"));
                 new_row.Cells["col_mail"].Value = Get_mail_usuari(num_comptador.ToString("D9"));
 
@@ -306,7 +304,6 @@ namespace FRAToMail
                 outputDocument.Save(path_pdf);
                 new_row.Cells["col_pdf"].Value = path_pdf;
                 new_row.Cells["col_open_pdf"].Value = "Obrir";
-
             }
 
         }
@@ -324,7 +321,6 @@ namespace FRAToMail
                             ";Extended Properties='Excel 8.0;HDR=YES;';";
 
             OleDbConnection con = new OleDbConnection(constr);
-
             OleDbCommand oconn = new OleDbCommand("Select * From [" + name + "$]", con);
 
             try
@@ -333,11 +329,10 @@ namespace FRAToMail
             }
             catch (OleDbException ex)
             {
-                MetroFramework.MetroMessageBox.Show(this, ex.Errors[0].Message, "Atenció", MessageBoxButtons.OK, MessageBoxIcon.Error, 200);                
+                MetroFramework.MetroMessageBox.Show(this, ex.Errors[0].Message, "Atenció", MessageBoxButtons.OK, MessageBoxIcon.Error, 200);
                 return;
             }
             OleDbDataAdapter sda = new OleDbDataAdapter(oconn);
-
             DataTable data = new DataTable();
 
             sda.Fill(data);
@@ -359,16 +354,16 @@ namespace FRAToMail
                     try
                     {
                         string struser = row["usuari"].ToString().Trim();
-                        int comptador = int.Parse(Str_comptador.ToString());                        
+                        int comptador = int.Parse(Str_comptador.ToString());
                         string new_name_user = "";
                         if (struser.Contains(",") == true && struser.Contains("S.L.") == false && struser.Contains("S.A.") == false && struser.Contains("AJUNTAMENT") == false)
                         {
                             string[] array_user = struser.Split(new char[] { ',' });
                             new_name_user = ToTitleCase(array_user[1].Trim() + " " + array_user[0].Trim());
                         }
-                        else                        
+                        else
                             new_name_user = ToTitleCase(struser);
-                        
+
                         DataRow newro = dt_usuaris.NewRow();
                         newro["comptador"] = comptador.ToString("D9");
                         newro["correu"] = row["correu"].ToString().Trim(); ;
@@ -380,7 +375,7 @@ namespace FRAToMail
                     {
                         if (DialogResult.OK != MetroFramework.MetroMessageBox.Show(this, string.Format("Error a la línia {0} i número de comptador {1}, vols continuar?", NumLine, Str_comptador), "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error, 100))
                             break;
-                    }                    
+                    }
                 }
 
             }
@@ -394,11 +389,8 @@ namespace FRAToMail
 
                 sda.Fill(data);
 
+                this.NameMailFrom = data.Rows[0]["name_mail_from"].ToString().Trim();
                 metroTextBoxMailBody.Text = data.Rows[0]["cos_missatge"].ToString().Trim();
-                metroTextBoxMailRemitent.Text = data.Rows[0]["correu_remitent"].ToString().Trim();
-                metroTextBoxMailPsw.Text = data.Rows[0]["contrasenya"].ToString().Trim();
-                metroTextBoxMailSMTP.Text = data.Rows[0]["servidor_smtp"].ToString().Trim();
-                metroTextBoxMailPort.Text = data.Rows[0]["port"].ToString().Trim();
                 metroTextBoxMailInform.Text = data.Rows[0]["correu_informe"].ToString().Trim();
                 string sbs = data.Rows[0]["pas_a_pas"].ToString().Trim();
 
@@ -410,9 +402,9 @@ namespace FRAToMail
                 ResetMailConf();
                 MetroFramework.MetroMessageBox.Show(this, string.Format("Error en la configuració: {0}", Ex.Message), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error, 150);
             }
-            
+
         }
-        
+
         private void ResetMailConf()
         {
             metroTextBoxMailBody.Text = string.Empty;
@@ -434,15 +426,12 @@ namespace FRAToMail
                             cOperator.OpCode.Name == OpCodeName.TJ.ToString())
                     foreach (var cOperand in cOperator.Operands)
                         textList.AddRange(ExtractText(cOperand));
-
-
             }
             else if (cObject is CSequence)
             {
                 var cSequence = cObject as CSequence;
                 foreach (var element in cSequence)
                     textList.AddRange(ExtractText(element));
-
             }
             else if (cObject is CString)
             {
@@ -461,7 +450,7 @@ namespace FRAToMail
             metroProgressBarSpinner.Visible = true;
             metroProgressBar1.Value = 1;
             this.Refresh();
-            
+
             buttonExctratPDF();
             metroProgressBarSpinner.Visible = false;
             metroPanel2.Visible = true;
@@ -481,8 +470,8 @@ namespace FRAToMail
             metroProgressBar1.Value = 2;
             this.Refresh();
 
-            string Informe =  SendEmails();
-            
+            string Informe = SendEmails();
+
             txtInforme.Text = Informe;
 
             StreamWriter sw = new StreamWriter(dir_output + "\\informe_" + DateTime.Now.ToString("yyy-MM-dd") + ".txt");
@@ -500,18 +489,31 @@ namespace FRAToMail
 
         private string SendEmails()
         {
+
+            // Your client ID and secret obtained from the Google Developer Console
+            string clientId = "1094024309478-2rstujeg08s3qge5dsphpj2rbqnt9dac.apps.googleusercontent.com";
+            string clientSecret = "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";
+
+            // Scopes for the Gmail API
+            string[] scopes = { GmailService.Scope.GmailSend };
+
+            // Path to the credentials file
+            string strWorkPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            string CredentialFile = Path.Combine(strWorkPath, "credential.json");
+            //string credPath = "C:\\temp\\GmailOAuthExample\\GmailOAuthExample\\credentials\\credentials2.json";
+            OAuthGmail oAuthGmail = new OAuthGmail(clientId, clientSecret, scopes, CredentialFile, APPLICATION_NAME);
+
             StringBuilder txtInforme = new StringBuilder();
             string html_body = metroTextBoxMailBody.Text;
-            int port_server = int.Parse(metroTextBoxMailPort.Text);// 25;
-            string from_mail = metroTextBoxMailRemitent.Text;
-            string pws = metroTextBoxMailPsw.Text;
-            string smtp = metroTextBoxMailSMTP.Text;
+            //int port_server = int.Parse(metroTextBoxMailPort.Text);// 25;
+            //string from_mail = metroTextBoxMailRemitent.Text;
+            //string pws = metroTextBoxMailPsw.Text;
+            //string smtp = metroTextBoxMailSMTP.Text;
 
             metroProgressBarSpinner.Maximum = metroGridListFra.Rows.Count;
-            txtInforme.AppendLine( "Inici de l'enviament de factures "+ DateTime.Now.ToLongTimeString());
+            txtInforme.AppendLine("Inici de l'enviament de factures " + DateTime.Now.ToLongTimeString());
             int Err_mail = 0;
 
-            
             for (int i = 0; i < metroGridListFra.Rows.Count; i++)
             {
                 Stopwatch timerPerMail = new Stopwatch();
@@ -520,94 +522,83 @@ namespace FRAToMail
                     txtInforme.AppendLine("L'usuari ha cancel·lat l'enviament de factures.");
                     break;
                 }
-                    
-                
+
                 metroProgressBarSpinner.Value = i;
                 metroProgressBarSpinner.Refresh();
                 metroLabelInfoProcess.Text = string.Format("Enviant {0} de {1} correus", i + 1, metroGridListFra.Rows.Count);//"Enviant "+(i+1).ToString + " correus";
                 metroLabelInfoProcess.Refresh();
-                
+
                 string client_mail = metroGridListFra.Rows[i].Cells["col_mail"].Value.ToString();
                 string path_pdf = metroGridListFra.Rows[i].Cells["col_pdf"].Value.ToString();
+
                 string nom_client = metroGridListFra.Rows[i].Cells["col_client"].Value.ToString();
                 string num_factura = metroGridListFra.Rows[i].Cells["col_fra"].Value.ToString();
                 string import = metroGridListFra.Rows[i].Cells["col_import"].Value.ToString();
-                
-                if (IsValidEmail(client_mail)==true){
-                    using (MailMessage emailMessage = new MailMessage())
+
+                if (IsValidEmail(client_mail) == true)
+                {
+                    var message = new MimeMessage();
+                    //message.From.Add(new MailboxAddress("Servei aigua", "aigua@elshostaletsdepierola.cat"));
+                    message.From.Add(new MailboxAddress(this.NameMailFrom, "aigua@hostalets.cat"));
+                    message.To.Add(new MailboxAddress(nom_client, client_mail));
+                    message.Subject = "Factura " + num_factura;
+
+                    string new_html_body = html_body.Replace("{client}", nom_client);
+                    new_html_body = new_html_body.Replace("{fra}", num_factura);
+                    new_html_body = new_html_body.Replace("{import}", import);
+
+                    var bodyBuilder = new BodyBuilder();
+                    bodyBuilder.Attachments.Add(path_pdf);
+                    
+                    bodyBuilder.HtmlBody = MyHtmlEncode(new_html_body);
+                    message.Body = bodyBuilder.ToMessageBody();
+
+                    // Send email
+                    try
                     {
-                        
-                        timerPerMail.Start();
-                        emailMessage.From = new MailAddress(from_mail, nom_remitent);
-                        emailMessage.To.Add(new MailAddress(client_mail, nom_client));
-                        emailMessage.Subject = "Factura " + num_factura;
-                        string new_html_body = html_body.Replace("{client}", nom_client);
-                        new_html_body = new_html_body.Replace("{fra}", num_factura);
-                        new_html_body = new_html_body.Replace("{import}", import);
-                        emailMessage.Body = new_html_body;
-                        emailMessage.BodyEncoding = Encoding.UTF8;
-                        emailMessage.Headers.Add("Content-Type", "text/html; charset=utf-8");
-                        emailMessage.IsBodyHtml = true;
-                        emailMessage.Attachments.Add(new Attachment(path_pdf));
-
-                        emailMessage.Priority = MailPriority.Normal;
-                        using (SmtpClient MailClient = new SmtpClient(smtp, port_server))
-                        {
-                            //MailClient.EnableSsl = true;
-                            MailClient.Credentials = new System.Net.NetworkCredential(from_mail, pws);
-                            try
-                            {
-                                MailClient.Send(emailMessage);
-                                txtInforme.AppendLine("Factura " + num_factura + " enviada a " + nom_client + " (" + client_mail + ") Temps(ms): " + timerPerMail.ElapsedMilliseconds);
-                            }
-                            catch (SmtpFailedRecipientsException ex)
-                            {
-                                for (int em = 0; em < ex.InnerExceptions.Length; em++)
-                                {
-                                    SmtpStatusCode status = ex.InnerExceptions[em].StatusCode;
-                                    if (status == SmtpStatusCode.MailboxBusy ||
-                                        status == SmtpStatusCode.MailboxUnavailable)
-                                    {
-                                        txtInforme.AppendLine("Entrega de correu fallida - provant en 5 segons");
-                                        System.Threading.Thread.Sleep(5000);
-
-                                        MailClient.Send(emailMessage);
-                                        txtInforme.AppendLine("Factura " + num_factura + " enviada a " + nom_client + " (" + client_mail + ") Temps(ms): " + timerPerMail.ElapsedMilliseconds);
-                                    }
-                                    else
-                                    {
-                                        txtInforme.AppendLine("Error al entregar correu amb missatge: " + ex.InnerExceptions[i].FailedRecipient + "  Temps(ms): " + timerPerMail.ElapsedMilliseconds);
-                                        Err_mail ++;
-                                    }
-                                }
-                            }
-                            catch(SmtpException ex)
-                            {
-                                txtInforme.AppendLine("Error al entregar correu: " + ex.ToString() + " Temps(ms): " + timerPerMail.ElapsedMilliseconds);
-                                Err_mail++;
-                            }
-                            catch (Exception ex)
-                            {
-                                txtInforme.AppendLine("Error al entregar correu: " + ex.ToString() + " Temps(ms): " + timerPerMail.ElapsedMilliseconds);
-                                Err_mail++;
-                            }
-                        }
+                        SendEmail(oAuthGmail.Service, "me", message);
+                        txtInforme.AppendLine("Factura " + num_factura + " enviada a " + nom_client + " (" + client_mail + ") Temps(ms): " + timerPerMail.ElapsedMilliseconds);
                     }
+                    catch (Exception ex)
+                    {
+                        txtInforme.AppendLine("Error al entregar correu: " + ex.ToString() + " Temps(ms): " + timerPerMail.ElapsedMilliseconds);
+                        Err_mail++;
+                    }
+
                     System.Threading.Thread.Sleep(500);
                 }
                 else
                 {
                     txtInforme.AppendLine("ERROR: Factura " + num_factura + "  NO enviada a " + nom_client + " (correu no vàlid) Temps(ms): " + timerPerMail.ElapsedMilliseconds);
                     Err_mail++;
-                }                
+                }
             }
-            txtInforme.AppendLine("Correus enviats: " + (metroGridListFra.Rows.Count - Err_mail).ToString() + ", enviaments errònis:  "+ Err_mail.ToString() +", d'un total de "+ metroGridListFra.Rows.Count.ToString()+".");
-            txtInforme.AppendLine("Final de l'enviament de factures " + DateTime.Now.ToLongTimeString() );
+            txtInforme.AppendLine("Correus enviats: " + (metroGridListFra.Rows.Count - Err_mail).ToString() + ", enviaments errònis:  " + Err_mail.ToString() + ", d'un total de " + metroGridListFra.Rows.Count.ToString() + ".");
+            txtInforme.AppendLine("Final de l'enviament de factures " + DateTime.Now.ToLongTimeString());
 
             return txtInforme.ToString();
-            
+        }
 
-        }        
+
+        static void SendEmail(GmailService service, string userId, MimeMessage emailMessage)
+        {
+            var message = new Google.Apis.Gmail.v1.Data.Message
+            {
+                Raw = Base64UrlEncode(emailMessage.ToString())
+            };
+
+            // Send email
+            service.Users.Messages.Send(message, userId).Execute();
+        }
+
+        static string Base64UrlEncode(string input)
+        {
+            var inputBytes = System.Text.Encoding.UTF8.GetBytes(input);
+            return Convert.ToBase64String(inputBytes)
+                .Replace('+', '-')
+                .Replace('/', '_')
+                .Replace("=", "");
+        }
 
         public string ToTitleCase(string str)
         {
@@ -623,7 +614,6 @@ namespace FRAToMail
                 {
                     return row["correu"].ToString();
                 }
-                
             }
             return "";
         }
@@ -634,9 +624,7 @@ namespace FRAToMail
             {
                 string comptador = row["comptador"].ToString();
                 if (comptador == num_comptador)
-                {
-                    return row["usuari"].ToString();                    
-                }
+                    return row["usuari"].ToString();
             }
             return "";
         }
@@ -657,9 +645,53 @@ namespace FRAToMail
             }
         }
 
+
         #endregion
+        private void linkHtml_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start(new ProcessStartInfo
+            {
+                FileName = linkHtml.Text,
+                UseShellExecute = true
+            });
+        }
 
+        private void metroButton1_Click(object sender, EventArgs e)
+        {            
+            metroTextBoxMailBody.Text = MyHtmlEncode(metroTextBoxMailBody.Text);
+        }
 
+        private string MyHtmlEncode(string inputHTML)
+        {
+            string Finaltxt = string.Empty;
+            //string pattern2 = @"(<[^>]*>)";
+            string pattern2 = @"<\s*([^ >]+)[^>]*>.*?<\s*/\s*\1\s*>";
+            //string pattern2 = @"<(.|\n)*?>";
+            var allTagList = new List<string>();
+
+            var patternMatch = Regex.Matches(inputHTML, pattern2);
+            for (int i = 0; i < patternMatch.Count; i++)
+            {
+                allTagList.Add(patternMatch[i].ToString());
+            }
+
+            foreach( string tag in allTagList )
+            {
+                int PuntOut = tag.IndexOf(">")+1;
+                string tagIn = tag.Substring(0, PuntOut);
+                string tagOut = tag.Substring(tag.Length - PuntOut-1, PuntOut+1);
+                string txt = tag.Replace(tagIn, "").Replace(tagOut, "");
+                
+                string resultTxt = tagIn + System.Net.WebUtility.HtmlEncode(txt) + tagOut;
+                if (resultTxt.Contains("€"))
+                    resultTxt = resultTxt.Replace("€", "&euro;");
+
+                Finaltxt += resultTxt;
+
+            }
+
+            return Finaltxt;
+        }
     }
 }
 //https://azuredevopslabs.com/labs/devopsserver/github/
