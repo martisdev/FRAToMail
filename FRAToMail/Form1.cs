@@ -59,19 +59,6 @@ namespace FRAToMail
 
         private void txtFiletoImport_ButtonClick(object sender, EventArgs e)
         {
-            
-            //using (var fbd = new FolderBrowserDialog())
-            //{
-            //    fbd.SelectedPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            //    DialogResult result = fbd.ShowDialog();
-
-            //    if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
-            //    {
-
-            //        txtDirToImport.Text = fbd.SelectedPath;
-
-            //    }                                
-            //}
             var path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             OpenFileDialog openFileDialog1 = new OpenFileDialog
             {
@@ -187,8 +174,8 @@ namespace FRAToMail
             string from_mail = "aigua@hostalets.cat";
 
             // Your client ID and secret obtained from the Google Developer Console
-            string clientId = "1094024309478-2rstujeg08s3qge5dsphpj2rbqnt9dac.apps.googleusercontent.com";
-            string clientSecret = "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";
+            string clientId = "XXXXXXXXXXXXXXXXXXXXXXXXXX.apps.googleusercontent.com";
+            string clientSecret = "XXXXXXXXXXX_tm";
 
             // Scopes for the Gmail API
             string[] scopes = { GmailService.Scope.GmailSend };
@@ -202,7 +189,7 @@ namespace FRAToMail
             
             //message.From.Add(new MailboxAddress("Servei aigua", "aigua@elshostaletsdepierola.cat"));
             message.From.Add(new MailboxAddress(this.NameMailFrom, from_mail));
-            message.To.Add(new MailboxAddress("Hooserpi", to_mail));
+            message.To.Add(new MailboxAddress("Hoserpi", to_mail));
             message.Subject = "Informe d'enviament factures de l'aigua";
 
             var bodyBuilder = new BodyBuilder();                        
@@ -250,6 +237,11 @@ namespace FRAToMail
             });
             //the end.
         }
+
+        #endregion
+
+        #region METHODS
+
 
         private void buttonExctratPDF()
         {
@@ -307,10 +299,6 @@ namespace FRAToMail
             }
 
         }
-
-        #endregion
-
-        #region METHODS
 
         private void Load_dbs()
         {
@@ -491,8 +479,8 @@ namespace FRAToMail
         {
 
             // Your client ID and secret obtained from the Google Developer Console
-            string clientId = "1094024309478-2rstujeg08s3qge5dsphpj2rbqnt9dac.apps.googleusercontent.com";
-            string clientSecret = "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";
+            string clientId = "XXXXX.apps.googleusercontent.com";
+            string clientSecret = "XXXXXX_tm";
 
             // Scopes for the Gmail API
             string[] scopes = { GmailService.Scope.GmailSend };
