@@ -19,7 +19,7 @@ SetupIconFile="logo.ico"
 
 AppCopyright=Copyright 2014, All rights reserved.
 PrivilegesRequired=admin
-OutputBaseFilename=Setup_FRA_TO_MAIL
+OutputBaseFilename=Setup_FRA_TO_MAIL_1_6_0
 DefaultDirName={pf}\fra_to_email
 DefaultGroupName=Factures H2O per E-mail
 
@@ -49,3 +49,6 @@ Source: System.Runtime.CompilerServices.Unsafe.dll; DestDir: {app};  Flags:  sha
 [Icons]
 Name: "{group}\Factures H2O per E-mail"; Filename: "{app}\FRAToMail.exe"; WorkingDir: "{app}" ;
 Name: "{userdesktop}\Factures H2O per E-mail"; Filename: "{app}\FRAToMail.exe"; WorkingDir: "{app}";
+
+[Dirs]
+Name: "{app}\data"; Permissions: everyone-full

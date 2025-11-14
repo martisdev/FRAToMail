@@ -22,10 +22,14 @@ namespace FRAToMail
 {
     public partial class FormMain : MetroForm
     {
+        #region FIELDS
 
-        #region CONSTS
-        
-        const string APPLICATION_NAME = "FraToMail";
+        string dir_output = "";
+
+        DataTable dt_usuaris = new DataTable();
+
+        Boolean CancelAction = false;
+
         #endregion
 
         #region PROPERTIES
@@ -36,21 +40,13 @@ namespace FRAToMail
         }
         #endregion
 
-        #region FIELDS
-
-        string dir_output = "";
-
-        DataTable dt_usuaris = new DataTable();
-
-        Boolean CancelAction = false;
-        #endregion
-
         #region CONSTRUCTOR
 
         public FormMain()
         {
             InitializeComponent();
             metroLinkVersion.Text = string.Format("Versió: {0}", Application.ProductVersion);
+
         }
 
         #endregion
@@ -83,6 +79,11 @@ namespace FRAToMail
             }
         }
 
+        /// <summary>
+        /// Open the pdf
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void metroGridListFra_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (metroGridListFra.Columns[e.ColumnIndex].Name == "col_open_pdf")
@@ -138,7 +139,6 @@ namespace FRAToMail
             var path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             OpenFileDialog openFileDialog1 = new OpenFileDialog
             {
-
                 InitialDirectory = path,
                 Title = "Busca el fitxer de les dades dels clients",
 
@@ -169,25 +169,12 @@ namespace FRAToMail
         private void metroTile5_Click(object sender, EventArgs e)
         {
             metroTileClose.Enabled = false;
-            
+
             string to_mail = metroTextBoxMailInform.Text;
-            string from_mail = "aigua@hostalets.cat";
+            string from_mail = "aigua@elshostaletsdepierola.cat";
 
-            // Your client ID and secret obtained from the Google Developer Console
-            string clientId = "XXXXXXXXXXXXXXXXXXXXXXXXXX.apps.googleusercontent.com";
-            string clientSecret = "XXXXXXXXXXX_tm";
-
-            // Scopes for the Gmail API
-            string[] scopes = { GmailService.Scope.GmailSend };
-
-            // Path to the credentials file
-            string strWorkPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            string CredentialFile = Path.Combine(strWorkPath, "credential.json");
-            //string credPath = "C:\\temp\\GmailOAuthExample\\GmailOAuthExample\\credentials\\credentials2.json";
-            OAuthGmail oAuthGmail = new OAuthGmail(clientId, clientSecret, scopes, CredentialFile, APPLICATION_NAME);
             var message = new MimeMessage();
-            
-            //message.From.Add(new MailboxAddress("Servei aigua", "aigua@elshostaletsdepierola.cat"));
+            //TODO: exepció amb varis correus separats per comes.
             message.From.Add(new MailboxAddress(this.NameMailFrom, from_mail));
             message.To.Add(new MailboxAddress("Hoserpi", to_mail));
             message.Subject = "Informe d'enviament factures de l'aigua";
@@ -199,8 +186,7 @@ namespace FRAToMail
             // Send email
             try
             {
-                SendEmail(oAuthGmail.Service, "me", message);
-                
+                SendEmail(Program.oAuthGmail.Service, "me", message);                
             }
             catch{}
 
@@ -242,10 +228,8 @@ namespace FRAToMail
 
         #region METHODS
 
-
         private void buttonExctratPDF()
         {
-
             metroGridListFra.Rows.Clear();
 
             string filename = txtDirToImport.Text;
@@ -255,51 +239,71 @@ namespace FRAToMail
             for (int idx = 0; idx < inputDocument.PageCount; idx++)
             {
 
-                metroProgressBarSpinner.Value = idx;
-                metroProgressBarSpinner.Refresh();
-                var page = inputDocument.Pages[idx];
-                var content = ContentReader.ReadContent(page);
-                var extractedText = ExtractText(content).ToArray();
+                try
+                {
+                    metroProgressBarSpinner.Value = idx;
+                    metroProgressBarSpinner.Refresh();
+                    var page = inputDocument.Pages[idx];
+                    var content = ContentReader.ReadContent(page);
+                    var extractedText = ExtractText(content).ToArray();
 
-                int pos_fra = extractedText[16].IndexOf("NUM.FACTURA:");
-                string num_fra = extractedText[16].Substring(pos_fra + 13, 10).Trim();
-                if (num_fra.Length == 0)
-                    num_fra = extractedText[25];
+                    string num_comptador = extractedText[26].Trim();
+                    string num_fra = string.Empty;
+                    string Import = extractedText[3].Trim();
+                    string Line = extractedText[16].Trim();                    
+                    //string Line_ = Regex.Replace(Line, @"\s+", "");
+                    
+                    string[] separators = { "NUM.FACTURA:", "Nº COMPTADOR:" , "COMPTADOR:" };
+                    string[] LineArray =  Line.Split(separators,100, StringSplitOptions.RemoveEmptyEntries);
+                    if(LineArray.Length == 2)
+                    {
+                        num_fra = LineArray[0].Trim();
+                        num_comptador = LineArray[1].Trim();
+                    }
+                    else if (LineArray.Length == 1)
+                    {
+                        num_comptador = LineArray[0];
+                    }
 
-                int pos_comp = extractedText[16].IndexOf("COMPTADOR:");
-                int num_comptador = int.Parse(extractedText[16].Substring(pos_comp + 11));
+                    if (string.IsNullOrEmpty(num_fra))
+                        num_fra = extractedText[24].Trim();
+                    
+                    if (string.IsNullOrEmpty(num_comptador))
+                        num_comptador = extractedText[26].Trim();
+                    
+                    int rowId = metroGridListFra.Rows.Add();
+                    DataGridViewRow new_row = metroGridListFra.Rows[rowId];
+                    new_row.Cells["col_fra"].Value = num_fra;
+                    new_row.Cells["col_comptador"].Value = num_comptador;
+                    new_row.Cells["col_import"].Value = Import;
 
-                int rowId = metroGridListFra.Rows.Add();
-                DataGridViewRow new_row = metroGridListFra.Rows[rowId];
-                new_row.Cells["col_fra"].Value = num_fra;
-                new_row.Cells["col_comptador"].Value = num_comptador.ToString("D9");
-                new_row.Cells["col_import"].Value = extractedText[3];
+                    new_row.Cells["col_client"].Value = Get_nom_usuari(num_comptador);
+                    new_row.Cells["col_mail"].Value = Get_mail_usuari(num_comptador);
 
-                //string usuari = Get_nom_usuari(num_comptador.ToString("D9"));
-                new_row.Cells["col_client"].Value = Get_nom_usuari(num_comptador.ToString("D9"));
-                new_row.Cells["col_mail"].Value = Get_mail_usuari(num_comptador.ToString("D9"));
+                    if (!System.IO.Directory.Exists(dir_output))
+                        System.IO.Directory.CreateDirectory(dir_output);
 
+                    string output_name_pdf = String.Format("fra-aigua-{0}.pdf", num_fra);
+                    string path_pdf = dir_output + "\\" + output_name_pdf;
+                    // Create new document
+                    PdfDocument outputDocument = new PdfDocument();
+                    outputDocument.Version = inputDocument.Version;
+                    outputDocument.Info.Title = String.Format("Page {0} of {1}", idx + 1, inputDocument.Info.Title);
+                    outputDocument.Info.Creator = inputDocument.Info.Creator;
+                    // Add the page and save it
+                    outputDocument.AddPage(inputDocument.Pages[idx]);
 
-                if (!System.IO.Directory.Exists(dir_output))
-                    System.IO.Directory.CreateDirectory(dir_output);
-
-                string output_name_pdf = String.Format("fra-aigua-{0}.pdf", num_fra);
-                string path_pdf = dir_output + "\\" + output_name_pdf;
-                // Create new document
-                PdfDocument outputDocument = new PdfDocument();
-                outputDocument.Version = inputDocument.Version;
-                outputDocument.Info.Title = String.Format("Page {0} of {1}", idx + 1, inputDocument.Info.Title);
-                outputDocument.Info.Creator = inputDocument.Info.Creator;
-                // Add the page and save it
-                outputDocument.AddPage(inputDocument.Pages[idx]);
-
-                outputDocument.Save(path_pdf);
-                new_row.Cells["col_pdf"].Value = path_pdf;
-                new_row.Cells["col_open_pdf"].Value = "Obrir";
+                    outputDocument.Save(path_pdf);
+                    new_row.Cells["col_pdf"].Value = path_pdf;
+                    new_row.Cells["col_open_pdf"].Value = "Obrir";
+                }
+                catch (Exception ex)
+                {
+                    continue;
+                }                
             }
-
         }
-
+       
         private void Load_dbs()
         {
             string FileToImport = this.txtFileDataBase.Text;
@@ -476,28 +480,10 @@ namespace FRAToMail
         }
 
         private string SendEmails()
-        {
-
-            // Your client ID and secret obtained from the Google Developer Console
-            string clientId = "XXXXX.apps.googleusercontent.com";
-            string clientSecret = "XXXXXX_tm";
-
-            // Scopes for the Gmail API
-            string[] scopes = { GmailService.Scope.GmailSend };
-
-            // Path to the credentials file
-            string strWorkPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            string CredentialFile = Path.Combine(strWorkPath, "credential.json");
-            //string credPath = "C:\\temp\\GmailOAuthExample\\GmailOAuthExample\\credentials\\credentials2.json";
-            OAuthGmail oAuthGmail = new OAuthGmail(clientId, clientSecret, scopes, CredentialFile, APPLICATION_NAME);
-
+        {                        
             StringBuilder txtInforme = new StringBuilder();
             string html_body = metroTextBoxMailBody.Text;
-            //int port_server = int.Parse(metroTextBoxMailPort.Text);// 25;
-            //string from_mail = metroTextBoxMailRemitent.Text;
-            //string pws = metroTextBoxMailPsw.Text;
-            //string smtp = metroTextBoxMailSMTP.Text;
-
+            
             metroProgressBarSpinner.Maximum = metroGridListFra.Rows.Count;
             txtInforme.AppendLine("Inici de l'enviament de factures " + DateTime.Now.ToLongTimeString());
             int Err_mail = 0;
@@ -544,7 +530,7 @@ namespace FRAToMail
                     // Send email
                     try
                     {
-                        SendEmail(oAuthGmail.Service, "me", message);
+                        SendEmail(Program.oAuthGmail.Service, "me", message);
                         txtInforme.AppendLine("Factura " + num_factura + " enviada a " + nom_client + " (" + client_mail + ") Temps(ms): " + timerPerMail.ElapsedMilliseconds);
                     }
                     catch (Exception ex)
@@ -675,7 +661,6 @@ namespace FRAToMail
                     resultTxt = resultTxt.Replace("€", "&euro;");
 
                 Finaltxt += resultTxt;
-
             }
 
             return Finaltxt;

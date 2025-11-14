@@ -53,7 +53,7 @@ namespace FRAToMail
             var credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
                 flow.ClientSecrets,
                 new[] { GmailService.Scope.GmailSend },
-                "user",
+                "aigua@elshostaletsdepierola.cat",
                 CancellationToken.None,
                 new FileDataStore(credPath, true)).Result;
 
@@ -68,6 +68,5 @@ namespace FRAToMail
         }
 
         #endregion
-
     }
 }
