@@ -51,17 +51,23 @@ namespace FRAToMail
         {
             try
             {
-                string clientId = "";
-                string clientSecret = "";
-
+                string AAAAd = "";
+                string cBBBBcret = "";
+                if(string.IsNullOrEmpty(AAAAd) || string.IsNullOrEmpty(cBBBBcret))
+                {
+                    //Developer go to config.txt
+                    ErrStr = "Desenvolupador, falten les credencials google.";                    
+                    return false;
+                }
+                
                 // Scopes for the Gmail API
                 string[] scopes = { GmailService.Scope.GmailSend };
-
+                
                 // Path to the credentials file
                 string strWorkPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
                 string CredentialPath = Path.Combine(strWorkPath, "data");
-
-                Program.oAuthGmail = new OAuthGmail(clientId, clientSecret, scopes, CredentialPath, Program.APPLICATION_NAME);
+                
+                Mailer.oAuthGmail = new OAuthGmail(AAAAd, cBBBBcret, scopes, CredentialPath, Manager.APPLICATION_NAME);
             }
             catch (Exception ex)
             {
