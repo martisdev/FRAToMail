@@ -51,8 +51,8 @@ namespace FRAToMail
         {
             try
             {
-                string clientId = "1094024309478-2rstujeg08s3qge5dsphpj2rbqnt9dac.apps.googleusercontent.com";
-                string clientSecret = "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";
+                string clientId = "";
+                string clientSecret = "";
 
                 // Scopes for the Gmail API
                 string[] scopes = { GmailService.Scope.GmailSend };
